@@ -32,7 +32,7 @@ provider:
     TODOS_TABLE: Todos-${self:provider.stage}
     TODOS_CREATED_AT_INDEX: CreatedAtIndex
     ATTACHMENT_S3_BUCKET: serverless-todos-images-1800-${self:provider.stage}
-    SIGNED_URL_EXPIRATION: 300
+    SIGNED_URL_EXPIRATION: 3000
     PROJECT_NAME: serverless-todo-app
     INDEX_NAME: ${self:provider.environment.TODOS_CREATED_AT_INDEX}
 
@@ -74,12 +74,12 @@ custom:
       - name: UpdateTodoRequest
         contentType: application/json
         schema: ${file(models/update-todo-model.json)}
-      # - name: Todo
-      #   contentType: application/json
-      #   schema: ${file(models/todo-model.json)}
       # - name: UploadUrlRequest
       #   contentType: application/json
       #   schema: ${file(models/upload-url-model.json)}
+      # - name: Todo
+      #   contentType: application/json
+      #   schema: ${file(models/todo-model.json)}
 
 functions:
   hello:
@@ -197,12 +197,35 @@ functions:
 
   # TODO: Configure this function
   # Provide property for setting up CORS, Authorizer, iamRoleStatements
-  # GenerateUploadUrl:
-  #   handler: src/lambda/http/generateUploadUrl.handler
-  #   events:
-  #     - http:
-  #         method: post
-  #         path: todos/{todoId}/attachment
+  GenerateUploadUrl:
+    handler: src/lambda/http/generateUploadUrl.handler
+    events:
+      - http:
+          method: post
+          path: todos/{todoId}/attachment
+          cors: true
+          authorizer: Auth
+          # reqValidatorName: RequestBodyValidator
+          # documentation:
+          #   summary: Generate a pre-signed URL for uploading an attachment
+          #   description: Generate a pre-signed URL for uploading an attachment
+          #   requestModels:
+          #     application/json: UploadUrlRequest
+    iamRoleStatementsName: ${self:provider.environment.PROJECT_NAME}-generate-upload-url-role-${self:provider.stage}
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - s3:*
+        Resource: arn:aws:s3:::${self:provider.environment.ATTACHMENT_S3_BUCKET}/*
+      - Effect: Allow
+        Action:
+          - dynamodb:Query
+          - dynamodb:PutItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+      - Effect: Allow
+        Action:
+          - xray:PutTraceSegments
+        Resource: '*'
 
 resources:
   Resources:

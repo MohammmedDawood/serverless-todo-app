@@ -61,3 +61,13 @@ export async function deleteTodo(
 
   return todosAccess.deleteTodoItem(userId, todoId)
 }
+
+// generate upload url function
+export async function createAttachmentPresignedUrl(
+  todoId: string,
+  userId: string
+): Promise<string> {
+  logger.info('createAttachmentPresignedUrl', { userId, todoId })
+
+  return attachmentUtils.getUploadUrl(todoId)
+}
