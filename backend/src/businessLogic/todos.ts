@@ -51,3 +51,13 @@ export async function updateTodo(
 
   return todosAccess.updateTodoItem(userId, todoId, updatedTodo)
 }
+
+// delete todo function
+export async function deleteTodo(
+  userId: string,
+  todoId: string
+): Promise<string> {
+  logger.info('deleteTodo', { userId, todoId })
+
+  return todosAccess.deleteTodoItem(userId, todoId)
+}
