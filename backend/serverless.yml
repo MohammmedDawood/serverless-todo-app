@@ -46,21 +46,9 @@ provider:
         - Effect: Allow
           Action:
             - xray:PutTelemetryRecords
-            - xray:PutTraceSegments
           Resource: '*'
 
 custom:
-  # topicName: imagesTopic-${self:provider.stage}
-
-  # serverless-offline:
-  #   port: 3003
-
-  # dynamodb:
-  #   start:
-  #     port: 8000
-  #     inMemory: true
-  #     migrate: true
-
   documentation:
     api:
       info:
@@ -74,26 +62,11 @@ custom:
       - name: UpdateTodoRequest
         contentType: application/json
         schema: ${file(models/update-todo-model.json)}
-      # - name: UploadUrlRequest
-      #   contentType: application/json
-      #   schema: ${file(models/upload-url-model.json)}
-      # - name: Todo
-      #   contentType: application/json
-      #   schema: ${file(models/todo-model.json)}
 
 functions:
-  hello:
-    handler: hello.handler
-    events:
-      - http:
-          path: /
-          method: get
-          # cors: true
-
   Auth:
     handler: src/lambda/auth/auth0Authorizer.handler
 
-  # TODO: Configure this function -
   # Provide iamRoleStatements property for performing Actions on DynamoDB
   GetTodos:
     handler: src/lambda/http/getTodos.handler
@@ -118,7 +91,6 @@ functions:
           - xray:PutTraceSegments
         Resource: '*'
 
-  # TODO: Configure this function -
   # Provide iamRoleStatements property. Decide the Actions and AWS Resource.
   # To refer to an AWS resource defined in the "Resources" section, you can use "Resource: !GetAtt <resource-name>.Arn"
   # To validate incoming HTTP requests, we have provided the request schemas in function definition below.
@@ -147,7 +119,6 @@ functions:
           - xray:PutTraceSegments
         Resource: '*'
 
-  # TODO: Configure this function
   # Provide property for setting up CORS, Authorizer, iamRoleStatements, and request schemas
   UpdateTodo:
     handler: src/lambda/http/updateTodo.handler
@@ -174,7 +145,6 @@ functions:
           - xray:PutTraceSegments
         Resource: '*'
 
-  # TODO: Configure this function
   # Provide property for setting up CORS, Authorizer, iamRoleStatements
   DeleteTodo:
     handler: src/lambda/http/deleteTodo.handler
@@ -195,7 +165,6 @@ functions:
           - xray:PutTraceSegments
         Resource: '*'
 
-  # TODO: Configure this function
   # Provide property for setting up CORS, Authorizer, iamRoleStatements
   GenerateUploadUrl:
     handler: src/lambda/http/generateUploadUrl.handler
@@ -205,12 +174,6 @@ functions:
           path: todos/{todoId}/attachment
           cors: true
           authorizer: Auth
-          # reqValidatorName: RequestBodyValidator
-          # documentation:
-          #   summary: Generate a pre-signed URL for uploading an attachment
-          #   description: Generate a pre-signed URL for uploading an attachment
-          #   requestModels:
-          #     application/json: UploadUrlRequest
     iamRoleStatementsName: ${self:provider.environment.PROJECT_NAME}-generate-upload-url-role-${self:provider.stage}
     iamRoleStatements:
       - Effect: Allow
