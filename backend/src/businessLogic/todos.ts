@@ -27,13 +27,13 @@ export async function createTodo(
 
   const todoId = uuid.v4()
   const createdAt = new Date().toISOString()
-  const s3AttachmentUrl = attachmentUtils.getAttachmentUrl(todoId)
+  // const s3AttachmentUrl = attachmentUtils.getAttachmentUrl(todoId)
   const newItem = {
     userId,
     todoId,
     createdAt,
     done: false,
-    attachmentUrl: s3AttachmentUrl,
+    attachmentUrl: null,
     ...newTodo
   }
 
@@ -66,7 +66,18 @@ export async function createAttachmentPresignedUrl(
   todoId: string,
   userId: string
 ): Promise<string> {
-  logger.info('createAttachmentPresignedUrl', { userId, todoId })
+  const attachmentId = uuid.v4()
+  const attachmentUrl = await attachmentUtils.getAttachmentUrl(attachmentId)
+  const uploadUrl = attachmentUtils.getUploadUrl(attachmentId)
 
-  return attachmentUtils.getUploadUrl(todoId)
+  const todoItem = await todosAccess.addAttachmentUrl(
+    userId,
+    todoId,
+    attachmentUrl
+  )
+  todoItem.attachmentUrl = uploadUrl
+
+  logger.info('URL updated', { todoItem })
+
+  return todoItem.attachmentUrl
 }
